@@ -35,6 +35,7 @@ const (
 	MonitorInfoConnect = "\\i"
 	MonitorLoadFile    = "\\lf"
 	MonitorTables      = "\\t"
+	MonitorConfig      = "\\cf"
 )
 
 var (
@@ -57,17 +58,16 @@ func helpText() {
 func monitorHelpText() {
 	fmt.Println("\n\tLists of all commands:\n\t\t" +
 		MonitorHelp + " - help information.\n\t\t" +
+		MonitorConfig + " - check config.\n\t\t" +
 		MonitorHistory + " - history commands.\n\t\t" +
 		MonitorInfoConnect + " - info about connection.\n\t\t" +
 		MonitorLoadFile + " - [file path].sql - load sql file for creating table(or insert or drop tables).\n\t\t" +
-		MonitorExit + " - exit.\n\t\t" +
 		MonitorStart + " - start test.\n\t\t" +
-		MonitorTables + " - check existing tables")
+		MonitorTables + " - check existing tables\n\t\t" +
+		MonitorExit + " - exit.")
 }
 
 func main() {
-	helpers.CheckConfig()
-
 	flag.Parse()
 
 	if *help {
@@ -160,6 +160,8 @@ func main() {
 			return
 		case MonitorHelp:
 			monitorHelpText()
+		case MonitorConfig:
+			helpers.PrintConfig()
 		case MonitorHistory:
 			terminal.PrintHistory()
 		case MonitorInfoConnect:

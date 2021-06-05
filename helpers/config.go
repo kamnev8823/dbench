@@ -2,17 +2,19 @@ package helpers
 
 import (
 	"errors"
+	"fmt"
 	"gopkg.in/yaml.v2"
 	"log"
 	"os"
 	"path/filepath"
 )
 
-//name config name
-const name = "config.yaml"
+//name config file name
+const name = "config.yml"
 
 //absPath get absolute file path
 func absPath() string {
+	//todo change finding absolute path to config
 	absPath, err := filepath.Abs(name)
 
 	if err != nil {
@@ -34,7 +36,6 @@ func GetValue(key string) (interface{}, error) {
 	config := all()
 
 	value, ok := config[key]
-
 	if !ok {
 		return "", errors.New("Key not found! ")
 	}
@@ -44,6 +45,7 @@ func GetValue(key string) (interface{}, error) {
 
 //all get all config
 func all() map[interface{}]interface{} {
+	CheckConfig()
 	path := absPath()
 
 	file, err := os.ReadFile(path)
@@ -59,4 +61,14 @@ func all() map[interface{}]interface{} {
 	}
 
 	return m
+}
+
+//PrintConfig print info config variables
+func PrintConfig() {
+	config := all()
+
+	fmt.Println("\n\tConfig values: ")
+	for k, v := range config {
+		fmt.Printf("\t%v : %v\n", k, v)
+	}
 }
