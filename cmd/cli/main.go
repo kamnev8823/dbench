@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/dbench/cmd/cli/db"
 	"github.com/dbench/cmd/cli/driver"
+	"github.com/dbench/helpers"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	"log"
@@ -58,13 +59,15 @@ func monitorHelpText() {
 		MonitorHelp + " - help information.\n\t\t" +
 		MonitorHistory + " - history commands.\n\t\t" +
 		MonitorInfoConnect + " - info about connection.\n\t\t" +
-		MonitorLoadFile + " [file path].sql - load sql file for creating table(or insert or drop tables).\n\t\t" +
+		MonitorLoadFile + " - [file path].sql - load sql file for creating table(or insert or drop tables).\n\t\t" +
 		MonitorExit + " - exit.\n\t\t" +
 		MonitorStart + " - start test.\n\t\t" +
 		MonitorTables + " - check existing tables")
 }
 
 func main() {
+	helpers.CheckConfig()
+
 	flag.Parse()
 
 	if *help {
@@ -146,7 +149,7 @@ func main() {
 				_, err = database.Exec(v)
 			}
 
-			fmt.Print("Ok")
+			fmt.Println("Ok")
 			terminal.Cursor()
 			continue
 		}
@@ -163,7 +166,8 @@ func main() {
 			data := conn.GetDataConnect()
 			data.PrintInfoConnect()
 		case MonitorTables:
-			db.PrintTables(existsTables)
+			tables := conn.Tables()
+			db.PrintTables(tables)
 		default:
 			fmt.Println("Invalid command. \\h - for get helping information.")
 		}

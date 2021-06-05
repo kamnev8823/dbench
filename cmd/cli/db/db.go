@@ -58,7 +58,7 @@ func (d *DataStruct) PrintInfoConnect() {
 //PrintTables print info about existing tables
 func PrintTables(tables []string) {
 
-	if len(tables) < 0 {
+	if len(tables) == 0 {
 		fmt.Println("Database is empty.")
 		return
 	}
