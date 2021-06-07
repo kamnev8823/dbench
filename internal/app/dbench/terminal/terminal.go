@@ -1,23 +1,23 @@
-package main
+package terminal
 
 import "fmt"
 
 type Terminal struct {
-	history []string
-	cursor  string
+	History []string
+	Cursor  string
 }
 
-func (t *Terminal) Cursor() {
-	fmt.Print(t.cursor)
+func (t *Terminal) PrintCursor() {
+	fmt.Print(t.Cursor)
 }
 
 func (t *Terminal) SaveHistory(s string) {
-	t.history = append(t.history, s)
+	t.History = append(t.History, s)
 }
 
 func (t *Terminal) PrintHistory() {
 	fmt.Println("\n\tHistory:")
-	for k, v := range t.history {
+	for k, v := range t.History {
 		fmt.Printf("\t%v. %v\n", k, v)
 	}
 }

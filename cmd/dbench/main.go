@@ -7,6 +7,7 @@ import (
 	"github.com/dbench/internal/app/dbench/db"
 	"github.com/dbench/internal/app/dbench/driver"
 	"github.com/dbench/internal/app/dbench/helpers"
+	"github.com/dbench/internal/app/dbench/terminal"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	"log"
@@ -111,21 +112,21 @@ func main() {
 	sc := bufio.NewScanner(os.Stdin)
 	fmt.Print("Welcome to DBench monitor. Successful database connection.\nType '\\h' for help. Type '\\q' for exit.\n\n")
 
-	terminal := Terminal{
-		[]string{},
-		fmt.Sprintf("dbench[%v]> ", dbDriver),
+	t := terminal.Terminal{
+		History: []string{},
+		Cursor:  fmt.Sprintf("dbench[%v]> ", dbDriver),
 	}
 
 	existsTables := conn.Tables()
 
 	fmt.Printf("Your database has %v tables. \n\n", len(existsTables))
 
-	terminal.Cursor()
+	t.PrintCursor()
 
 	for sc.Scan() {
-		terminal.Cursor()
+		t.PrintCursor()
 		command := sc.Text()
-		terminal.SaveHistory(command)
+		t.SaveHistory(command)
 
 		if strings.Contains(command, MonitorLoadFile) {
 			file := strings.Replace(command, MonitorLoadFile, "", 1)
@@ -133,7 +134,7 @@ func main() {
 
 			if file == "" || !strings.Contains(command, ".sql") {
 				log.Println("Error, invalid file!")
-				terminal.Cursor()
+				t.PrintCursor()
 				continue
 			}
 
@@ -141,7 +142,7 @@ func main() {
 
 			if err != nil {
 				log.Println(err)
-				terminal.Cursor()
+				t.PrintCursor()
 				continue
 			}
 
@@ -150,7 +151,7 @@ func main() {
 			}
 
 			fmt.Println("Ok")
-			terminal.Cursor()
+			t.PrintCursor()
 			continue
 		}
 
@@ -163,7 +164,7 @@ func main() {
 		case MonitorConfig:
 			helpers.PrintConfig()
 		case MonitorHistory:
-			terminal.PrintHistory()
+			t.PrintHistory()
 		case MonitorInfoConnect:
 			data := conn.GetDataConnect()
 			data.PrintInfoConnect()
@@ -174,6 +175,6 @@ func main() {
 			fmt.Println("Invalid command. \\h - for get helping information.")
 		}
 
-		terminal.Cursor()
+		t.PrintCursor()
 	}
 }
