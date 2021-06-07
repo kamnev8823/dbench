@@ -1,38 +1,37 @@
-package pgsql
+package mysql
 
 import (
 	"bufio"
 	"database/sql"
 	"fmt"
-	"github.com/dbench/cmd/cli/db"
+	db2 "github.com/dbench/internal/app/dbench/db"
 	"io"
 	"os"
 	"strings"
 	"sync"
 )
 
-type Data db.DataStruct
+type Data db2.DataStruct
 
 var (
-	once sync.Once
-
+	fOnce    sync.Once
 	instance Data
 )
 
 func New() *Data {
-	once.Do(func() {
+	fOnce.Do(func() {
 		instance = Data{}
 	})
 
 	return &instance
 }
 
-func (d *Data) FormConnect() string {
-	return fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", d.User, d.Password, d.Host, d.Db)
-}
-
 func (d *Data) SetHandle(database *sql.DB) {
 	d.Handle = database
+}
+
+func (d *Data) FormConnect() string {
+	return fmt.Sprintf("%s:%s@tcp(%s)/%s", d.User, d.Password, d.Host, d.Db)
 }
 
 func (d *Data) SetDataConnect(driver string, host string, user string, password string, db string) {
@@ -43,10 +42,10 @@ func (d *Data) SetDataConnect(driver string, host string, user string, password 
 	d.Password = password
 }
 
-func (d *Data) GetDataConnect() db.DataStruct {
+func (d *Data) GetDataConnect() db2.DataStruct {
 	info := New()
 
-	return db.DataStruct{
+	return db2.DataStruct{
 		Db:       info.Db,
 		Host:     info.Host,
 		User:     info.User,
@@ -55,8 +54,8 @@ func (d *Data) GetDataConnect() db.DataStruct {
 	}
 }
 
-//ParseDump Method for reading sql file for postgresql dbms
-func (d *Data) ParseDump(path string) (*db.ParseStruct, error) {
+//ParseDump Method for reading sql file for mysql dbms
+func (d *Data) ParseDump(path string) (*db2.ParseStruct, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -64,7 +63,7 @@ func (d *Data) ParseDump(path string) (*db.ParseStruct, error) {
 	defer file.Close()
 
 	reader := bufio.NewReader(file)
-	parseStruct := &db.ParseStruct{}
+	parseStruct := &db2.ParseStruct{}
 
 	for {
 		l, _, err := reader.ReadLine()

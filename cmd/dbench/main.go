@@ -4,9 +4,9 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"github.com/dbench/cmd/cli/db"
-	"github.com/dbench/cmd/cli/driver"
-	"github.com/dbench/helpers"
+	"github.com/dbench/internal/app/dbench/db"
+	"github.com/dbench/internal/app/dbench/driver"
+	"github.com/dbench/internal/app/dbench/helpers"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	"log"
@@ -40,7 +40,7 @@ const (
 
 var (
 	dbDriver   = flag.String(DBDriver, None, "Database driver, you can set pgsql/mysql.")
-	dbHost     = flag.String(DBHost, "127.0.0.1", "Database host.")
+	dbHost     = flag.String(DBHost, "17.0.0.1", "Database host.")
 	dbUser     = flag.String(DBUser, "root", "Database user name.")
 	dbPassword = flag.String(DBPassword, "root", "Database user password.")
 	dbName     = flag.String(DBName, None, "Database name.")
@@ -57,14 +57,14 @@ func helpText() {
 // monitorHelpText monitor help information
 func monitorHelpText() {
 	fmt.Println("\n\tLists of all commands:\n\t\t" +
-		MonitorHelp + " - help information.\n\t\t" +
+		MonitorHelp + "  - help information.\n\t\t" +
 		MonitorConfig + " - check config.\n\t\t" +
 		MonitorHistory + " - history commands.\n\t\t" +
-		MonitorInfoConnect + " - info about connection.\n\t\t" +
+		MonitorInfoConnect + "  - info about connection.\n\t\t" +
 		MonitorLoadFile + " - [file path].sql - load sql file for creating table(or insert or drop tables).\n\t\t" +
-		MonitorStart + " - start test.\n\t\t" +
-		MonitorTables + " - check existing tables\n\t\t" +
-		MonitorExit + " - exit.")
+		MonitorStart + "  - start tests.\n\t\t" +
+		MonitorTables + "  - check existing tables\n\t\t" +
+		MonitorExit + "  - exit.")
 }
 
 func main() {
@@ -82,7 +82,7 @@ func main() {
 	}
 
 	dbName := *dbName
-	//dbName := "test"
+	//dbName := "tests"
 	if dbName == None {
 		log.Fatalf("Error, invalid database name!")
 	}

@@ -10,7 +10,7 @@ import (
 )
 
 //name config file name
-const name = "config.yml"
+const name = "configs/config.yml"
 
 //absPath get absolute file path
 func absPath() string {
@@ -69,6 +69,6 @@ func PrintConfig() {
 
 	fmt.Println("\n\tConfig values: ")
 	for k, v := range config {
-		fmt.Printf("\t%v : %v\n", k, v)
+		fmt.Printf("\t\t%v => %v\n", k, v)
 	}
 }

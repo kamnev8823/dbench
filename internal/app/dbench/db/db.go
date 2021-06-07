@@ -52,7 +52,8 @@ func (d *DataStruct) PrintInfoConnect() {
 		d.Host,
 		d.Db,
 		d.User,
-		d.Password)
+		d.Password,
+	)
 }
 
 //PrintTables print info about existing tables
