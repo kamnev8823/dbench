@@ -1,10 +1,10 @@
-package pgsql
+package mysql
 
 import (
 	"bufio"
 	"database/sql"
 	"fmt"
-	"github.com/dbench/internal/app/dbench/db"
+	"github.com/dbench/internal/app/db"
 	"io"
 	"os"
 	"strings"
@@ -14,25 +14,24 @@ import (
 type Data db.DataStruct
 
 var (
-	once sync.Once
-
+	fOnce    sync.Once
 	instance Data
 )
 
 func New() *Data {
-	once.Do(func() {
+	fOnce.Do(func() {
 		instance = Data{}
 	})
 
 	return &instance
 }
 
-func (d *Data) FormConnect() string {
-	return fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", d.User, d.Password, d.Host, d.Db)
-}
-
 func (d *Data) SetHandle(database *sql.DB) {
 	d.Handle = database
+}
+
+func (d *Data) FormConnect() string {
+	return fmt.Sprintf("%s:%s@tcp(%s)/%s", d.User, d.Password, d.Host, d.Db)
 }
 
 func (d *Data) SetDataConnect(driver string, host string, user string, password string, db string) {
@@ -55,7 +54,7 @@ func (d *Data) GetDataConnect() db.DataStruct {
 	}
 }
 
-//ParseDump Method for reading sql file for postgresql dbms
+//ParseDump Method for reading sql file for mysql dbms
 func (d *Data) ParseDump(path string) (*db.ParseStruct, error) {
 	file, err := os.Open(path)
 	if err != nil {

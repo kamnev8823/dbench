@@ -3,9 +3,9 @@ package driver
 import (
 	"database/sql"
 	"errors"
-	"github.com/dbench/internal/app/dbench/db"
-	"github.com/dbench/internal/app/dbench/driver/mysql"
-	"github.com/dbench/internal/app/dbench/driver/pgsql"
+	"github.com/dbench/internal/app/db"
+	"github.com/dbench/internal/app/driver/mysql"
+	"github.com/dbench/internal/app/driver/pgsql"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 )
