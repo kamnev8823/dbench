@@ -1,6 +1,12 @@
 package mysql
 
-func (d *Data) Tables() []string {
+import "github.com/dbench/internal/app/db"
+
+func (d *Data) Analyze() []db.Table {
+	return []db.Table{}
+}
+
+func (d *Data) GetTables() []string {
 	handle := d.Handle
 	rows, _ := handle.Query("SHOW TABLES")
 

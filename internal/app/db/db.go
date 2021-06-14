@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"sort"
 	"strconv"
@@ -24,7 +25,7 @@ type ParseDump interface {
 
 //Analyze get information about the used database
 type Analyze interface {
-	Tables() []string
+	Analyze() []Table
 }
 
 //Handler handle operation
@@ -32,10 +33,12 @@ type Handler interface {
 	SetHandle(database *sql.DB)
 }
 
+//ParseStruct data after parsing struct
 type ParseStruct struct {
 	Data []string
 }
 
+//DataStruct info about connection data
 type DataStruct struct {
 	Db       string
 	Host     string
@@ -43,6 +46,31 @@ type DataStruct struct {
 	Driver   string
 	Password string
 	Handle   *sql.DB
+	Tables   []Table
+}
+
+//Table info about the table
+type Table struct {
+	Name        string
+	Columns     []Column
+	ForeignKeys []ForeignKey
+}
+
+// ForeignKey information about foreign keys in table
+type ForeignKey struct {
+	TableName       string
+	ColumnName      string
+	ConstraintName  string
+	ReferenceTable  string
+	ReferenceColumn string
+}
+
+//Column information about column in table
+type Column struct {
+	Name     string
+	Type     string
+	Nullable bool
+	Default  string
 }
 
 //PrintInfoConnect print info about connection
@@ -57,8 +85,7 @@ func (d *DataStruct) PrintInfoConnect() {
 }
 
 //PrintTables print info about existing tables
-func PrintTables(tables []string) {
-
+func PrintTables(tables []Table) {
 	if len(tables) == 0 {
 		fmt.Println("Database is empty.")
 		return
@@ -66,8 +93,8 @@ func PrintTables(tables []string) {
 
 	var lenNames []int
 
-	for _, v := range tables {
-		lenNames = append(lenNames, len(v))
+	for _, t := range tables {
+		lenNames = append(lenNames, len(t.Name))
 	}
 
 	sort.Ints(lenNames)
@@ -76,9 +103,27 @@ func PrintTables(tables []string) {
 
 	fmt.Println()
 	fmt.Println(line)
-	for _, v := range tables {
-		quantitySpaces := maxLenName - len(v) - 1
-		fmt.Printf("| "+v+"%"+strconv.Itoa(quantitySpaces)+"s|\n", " ")
+	for _, t := range tables {
+		quantitySpaces := maxLenName - len(t.Name) - 1
+		fmt.Printf("| %v%"+strconv.Itoa(quantitySpaces)+"s|\n", t.Name, " ")
 	}
 	fmt.Println(line)
+}
+
+//todo change the printing
+func PrintColumns(columns []Column) {
+	fmt.Println()
+	for _, t := range columns {
+		fmt.Printf("--%v--\n", t.Name)
+	}
+}
+
+// FindTable findTable Find table in database
+func FindTable(name string, tables []Table) (Table, error) {
+	for _, v := range tables {
+		if v.Name == name {
+			return v, nil
+		}
+	}
+	return Table{}, errors.New("No such table exists ")
 }

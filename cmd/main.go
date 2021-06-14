@@ -29,19 +29,21 @@ const (
 
 // Monitor commands
 const (
-	MonitorHelp        = "\\h"
-	MonitorExit        = "\\q"
-	MonitorStart       = "\\s"
-	MonitorHistory     = "\\hc"
-	MonitorInfoConnect = "\\i"
-	MonitorLoadFile    = "\\lf"
-	MonitorTables      = "\\t"
-	MonitorConfig      = "\\cf"
+	MonitorHelp          = "\\h"
+	MonitorExit          = "\\q"
+	MonitorConfig        = "\\cf"
+	MonitorHistory       = "\\hc"
+	MonitorInfoConnect   = "\\i"
+	MonitorStart         = "\\s"
+	MonitorLoadFile      = "\\lf"
+	MonitorTables        = "\\t"
+	MonitorTableColumns  = "\\tc"
+	MonitorRelationships = "\\tr"
 )
 
 var (
-	dbDriver   = flag.String(DBDriver, None, "Database driver, you can set pgsql/mysql.")
-	dbHost     = flag.String(DBHost, "17.0.0.1", "Database host.")
+	dbDriver   = flag.String(DBDriver, None, "Database driver, you can set postgres/mysql.")
+	dbHost     = flag.String(DBHost, "127.0.0.1", "Database host.")
 	dbUser     = flag.String(DBUser, "root", "Database user name.")
 	dbPassword = flag.String(DBPassword, "root", "Database user password.")
 	dbName     = flag.String(DBName, None, "Database name.")
@@ -62,9 +64,13 @@ func monitorHelpText() {
 		MonitorConfig + " - check config.\n\t\t" +
 		MonitorHistory + " - history commands.\n\t\t" +
 		MonitorInfoConnect + "  - info about connection.\n\t\t" +
-		MonitorLoadFile + " - [file path].sql - load sql file for creating table(or insert or drop tables).\n\t\t" +
+		MonitorLoadFile + " [file path].sql - load sql file for creating table(or insert or drop tables).\n\t\t" +
 		MonitorStart + "  - start tests.\n\t\t" +
 		MonitorTables + "  - check existing tables\n\t\t" +
+		MonitorTableColumns + " [table] - check existing table column\n\t\t" +
+		MonitorRelationships + " - check relationship tables." +
+		"\n\t\t\tRelations are determined by the name of the column that matches the pattern 'table_id' or by the presence of a foreign key.\n\t\t\t" +
+		"To manage relationships, use the d command.\n\t\t" +
 		MonitorExit + "  - exit.")
 }
 
@@ -77,13 +83,11 @@ func main() {
 	}
 
 	dbDriver := *dbDriver
-	//dbDriver := "mysql"
 	if dbDriver == None || (dbDriver != driver.Mysql && dbDriver != driver.Postgres) {
 		log.Fatalf("Error, invalid database driver!")
 	}
 
 	dbName := *dbName
-	//dbName := "tests"
 	if dbName == None {
 		log.Fatalf("Error, invalid database name!")
 	}
@@ -110,21 +114,17 @@ func main() {
 	defer database.Close()
 
 	sc := bufio.NewScanner(os.Stdin)
-	fmt.Print("Welcome to DBench monitor. Successful database connection.\nType '\\h' for help. Type '\\q' for exit.\n\n")
 
 	t := terminal.Terminal{
 		History: []string{},
 		Cursor:  fmt.Sprintf("dbench[%v]> ", dbDriver),
 	}
-
-	existsTables := conn.Tables()
-
+	existsTables := conn.Analyze()
+	fmt.Print("Welcome to DBench monitor. Successful database connection.\nType '\\h' for help. Type '\\q' for exit.\n\n")
 	fmt.Printf("Your database has %v tables. \n\n", len(existsTables))
-
 	t.PrintCursor()
 
 	for sc.Scan() {
-		t.PrintCursor()
 		command := sc.Text()
 		t.SaveHistory(command)
 
@@ -155,6 +155,24 @@ func main() {
 			continue
 		}
 
+		if strings.Contains(command, MonitorTableColumns) {
+			tableName := strings.Replace(command, MonitorTableColumns, "", 1)
+			tableName = strings.TrimSpace(tableName)
+
+			tables := conn.Analyze()
+			table, err := db.FindTable(tableName, tables)
+
+			if err != nil {
+				log.Println(err)
+				t.PrintCursor()
+				continue
+			}
+
+			db.PrintColumns(table.Columns)
+			t.PrintCursor()
+			continue
+		}
+
 		switch command {
 		case MonitorExit:
 			fmt.Println("Bye")
@@ -169,7 +187,7 @@ func main() {
 			data := conn.GetDataConnect()
 			data.PrintInfoConnect()
 		case MonitorTables:
-			tables := conn.Tables()
+			tables := conn.Analyze()
 			db.PrintTables(tables)
 		default:
 			fmt.Println("Invalid command. \\h - for get helping information.")
