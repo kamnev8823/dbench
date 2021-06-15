@@ -22,7 +22,6 @@ const (
 	DBUser     = "user"
 	DBPassword = "password"
 	DBName     = "db"
-	DBClear    = "clear"
 	Help       = "help"
 	None       = "none"
 )
@@ -35,7 +34,6 @@ const (
 	MonitorHistory       = "\\hc"
 	MonitorInfoConnect   = "\\i"
 	MonitorStart         = "\\s"
-	MonitorLoadFile      = "\\lf"
 	MonitorTables        = "\\t"
 	MonitorTableColumns  = "\\tc"
 	MonitorRelationships = "\\tr"
@@ -48,7 +46,6 @@ var (
 	dbPassword = flag.String(DBPassword, "root", "Database user password.")
 	dbName     = flag.String(DBName, None, "Database name.")
 	help       = flag.Bool(Help, false, "Get help info.")
-	clear      = flag.Bool(DBClear, false, "Delete generated tables after testing.")
 )
 
 // helpText help information
@@ -64,7 +61,6 @@ func monitorHelpText() {
 		MonitorConfig + " - check config.\n\t\t" +
 		MonitorHistory + " - history commands.\n\t\t" +
 		MonitorInfoConnect + "  - info about connection.\n\t\t" +
-		MonitorLoadFile + " [file path].sql - load sql file for creating table(or insert or drop tables).\n\t\t" +
 		MonitorStart + "  - start tests.\n\t\t" +
 		MonitorTables + "  - check existing tables\n\t\t" +
 		MonitorTableColumns + " [table] - check existing table column\n\t\t" +
@@ -127,33 +123,6 @@ func main() {
 	for sc.Scan() {
 		command := sc.Text()
 		t.SaveHistory(command)
-
-		if strings.Contains(command, MonitorLoadFile) {
-			file := strings.Replace(command, MonitorLoadFile, "", 1)
-			file = strings.TrimSpace(file)
-
-			if file == "" || !strings.Contains(command, ".sql") {
-				log.Println("Error, invalid file!")
-				t.PrintCursor()
-				continue
-			}
-
-			dump, err := conn.ParseDump(file)
-
-			if err != nil {
-				log.Println(err)
-				t.PrintCursor()
-				continue
-			}
-
-			for _, v := range dump.Data {
-				_, err = database.Exec(v)
-			}
-
-			fmt.Println("Ok")
-			t.PrintCursor()
-			continue
-		}
 
 		if strings.Contains(command, MonitorTableColumns) {
 			tableName := strings.Replace(command, MonitorTableColumns, "", 1)

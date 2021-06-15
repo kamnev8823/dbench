@@ -10,17 +10,12 @@ import (
 )
 
 type Connect interface {
-	ParseDump
 	Handler
 	Analyze
 	FormConnect() string
+	// todo change data getter
 	GetDataConnect() DataStruct
 	SetDataConnect(driver string, host string, user string, password string, db string)
-}
-
-//ParseDump separation of logic for reading a dump for different dbms
-type ParseDump interface {
-	ParseDump(path string) (*ParseStruct, error)
 }
 
 //Analyze get information about the used database
@@ -31,11 +26,6 @@ type Analyze interface {
 //Handler handle operation
 type Handler interface {
 	SetHandle(database *sql.DB)
-}
-
-//ParseStruct data after parsing struct
-type ParseStruct struct {
-	Data []string
 }
 
 //DataStruct info about connection data
