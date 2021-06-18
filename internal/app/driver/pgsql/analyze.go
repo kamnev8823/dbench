@@ -5,24 +5,12 @@ import (
 )
 
 func (d *Data) Analyze() []db.Table {
-	handle := d.Handle
-	//todo get user to change schema
-	rows, _ := handle.Query("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = 'public' ORDER BY TABLE_NAME")
-	defer rows.Close()
-
 	var (
-		tables      []db.Table
 		columns     []db.Column
 		foreignKeys []db.ForeignKey
 	)
 
-	for rows.Next() {
-		var tableName string
-		rows.Scan(&tableName)
-		tables = append(tables, db.Table{Name: tableName})
-	}
-
-	d.Tables = tables
+	d.Tables = d.GetTables()
 
 	for k, t := range d.Tables {
 		columns = d.getColumns(t.Name)
@@ -34,6 +22,22 @@ func (d *Data) Analyze() []db.Table {
 		d.Tables[k].ForeignKeys = foreignKeys
 	}
 
+	return d.Tables
+}
+
+func (d *Data) GetTables() []db.Table {
+	handle := d.Handle
+	//todo get user to change schema
+	rows, _ := handle.Query("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = 'public' ORDER BY TABLE_NAME")
+	defer rows.Close()
+
+	var tables []db.Table
+
+	for rows.Next() {
+		var tableName string
+		rows.Scan(&tableName)
+		tables = append(tables, db.Table{Name: tableName})
+	}
 	return tables
 }
 
