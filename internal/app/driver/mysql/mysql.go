@@ -10,12 +10,12 @@ import (
 type Data db.DataStruct
 
 var (
-	fOnce    sync.Once
+	once     sync.Once
 	instance Data
 )
 
 func New() *Data {
-	fOnce.Do(func() {
+	once.Do(func() {
 		instance = Data{}
 	})
 

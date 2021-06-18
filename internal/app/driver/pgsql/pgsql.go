@@ -10,8 +10,7 @@ import (
 type Data db.DataStruct
 
 var (
-	once sync.Once
-
+	once     sync.Once
 	instance Data
 )
 
