@@ -2,6 +2,7 @@ package pgsql
 
 import (
 	"github.com/dbench/internal/app/db"
+	"github.com/dbench/internal/app/helpers"
 )
 
 func (d *Data) Analyze() []db.Table {
@@ -96,18 +97,11 @@ func (d *Data) getColumns(table string) []db.Column {
 		var (
 			column   db.Column
 			nullable string
-			isNull   bool
 		)
 
 		rows.Scan(&column.Name, &nullable, &column.Type, &column.Default)
 
-		if nullable == "YES" {
-			isNull = true
-		} else {
-			isNull = false
-		}
-
-		column.Nullable = isNull
+		column.Nullable = helpers.ConvertDBMSNullToBool(nullable)
 		columns = append(columns, column)
 	}
 
