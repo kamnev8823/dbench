@@ -16,7 +16,7 @@ func (t *Terminal) SaveHistory(s string) {
 }
 
 func (t *Terminal) PrintHistory() {
-	fmt.Println("\n\tHistory:")
+	fmt.Print("\n\tHistory:")
 	for k, v := range t.History {
 		fmt.Printf("\t%v. %v\n", k, v)
 	}

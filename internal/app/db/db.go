@@ -3,10 +3,6 @@ package db
 import (
 	"database/sql"
 	"errors"
-	"fmt"
-	"sort"
-	"strconv"
-	"strings"
 )
 
 type Connect interface {
@@ -46,15 +42,6 @@ type Table struct {
 	ForeignKeys []ForeignKey
 }
 
-// ForeignKey information about foreign keys in table
-type ForeignKey struct {
-	TableName       string
-	ColumnName      string
-	ConstraintName  string
-	ReferenceTable  string
-	ReferenceColumn string
-}
-
 //Column information about column in table
 type Column struct {
 	Name     string
@@ -63,49 +50,24 @@ type Column struct {
 	Default  string
 }
 
-//PrintInfoConnect print info about connection
-func (d *DataStruct) PrintInfoConnect() {
-	fmt.Printf("\n\tConnection info: \n\t\tDBMS: %v,\n\t\tHost: %v,\n\t\tDatabase: %v,\n\t\tUser: %v,\n\t\tPassword: %v\n",
-		d.Driver,
-		d.Host,
-		d.Db,
-		d.User,
-		d.Password,
-	)
+// ForeignKey information about foreign keys in table
+type ForeignKey struct {
+	ColumnName      string
+	ConstraintName  string
+	ReferenceTable  string
+	ReferenceColumn string
 }
 
-//PrintTables print info about existing tables
-func PrintTables(tables []Table) {
-	if len(tables) == 0 {
-		fmt.Println("Database is empty.")
-		return
-	}
-
-	var lenNames []int
-
-	for _, t := range tables {
-		lenNames = append(lenNames, len(t.Name))
-	}
-
-	sort.Ints(lenNames)
-	maxLenName := lenNames[len(lenNames)-1] + 2
-	line := fmt.Sprint("+" + strings.Repeat("-", maxLenName) + "+")
-
-	fmt.Println()
-	fmt.Println(line)
-	for _, t := range tables {
-		quantitySpaces := maxLenName - len(t.Name) - 1
-		fmt.Printf("| %v%"+strconv.Itoa(quantitySpaces)+"s|\n", t.Name, " ")
-	}
-	fmt.Println(line)
+// PrimaryKey todo test
+type PrimaryKey struct {
+	ColumnName     string
+	ConstraintName string
 }
 
-//todo change the printing
-func PrintColumns(columns []Column) {
-	fmt.Println()
-	for _, t := range columns {
-		fmt.Printf("--%v--\n", t.Name)
-	}
+// IndexKey todo test
+type IndexKey struct {
+	Name string
+	Def  string
 }
 
 // FindTable findTable Find table in database

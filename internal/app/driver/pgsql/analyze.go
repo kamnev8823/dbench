@@ -8,15 +8,16 @@ func (d *Data) Analyze() []db.Table {
 	handle := d.Handle
 	//todo get user to change schema
 	rows, _ := handle.Query("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = 'public' ORDER BY TABLE_NAME")
+	defer rows.Close()
 
 	var (
 		tables      []db.Table
-		tableName   string
 		columns     []db.Column
 		foreignKeys []db.ForeignKey
 	)
 
 	for rows.Next() {
+		var tableName string
 		rows.Scan(&tableName)
 		tables = append(tables, db.Table{Name: tableName})
 	}
@@ -40,7 +41,6 @@ func (d *Data) getForeignKeys(table string) []db.ForeignKey {
 	handle := d.Handle
 	query := `
 	SELECT  tc.constraint_name,
-		tc.table_name,
 		kcu.column_name,
 		ccu.table_name AS references_table,
 		ccu.column_name AS references_field
@@ -64,14 +64,13 @@ func (d *Data) getForeignKeys(table string) []db.ForeignKey {
 	WHERE tc.constraint_type = 'FOREIGN KEY' AND tc.table_name = $1;`
 
 	rows, _ := handle.Query(query, table)
+	defer rows.Close()
 
-	var (
-		keys []db.ForeignKey
-		key  db.ForeignKey
-	)
+	var keys []db.ForeignKey
 
 	for rows.Next() {
-		rows.Scan(&key.ConstraintName, &key.TableName, &key.ColumnName, &key.ReferenceTable, &key.ReferenceColumn)
+		var key db.ForeignKey
+		rows.Scan(&key.ConstraintName, &key.ColumnName, &key.ReferenceTable, &key.ReferenceColumn)
 		keys = append(keys, key)
 	}
 
@@ -81,19 +80,22 @@ func (d *Data) getForeignKeys(table string) []db.ForeignKey {
 //getColumns get existing columns in the table
 func (d *Data) getColumns(table string) []db.Column {
 	handle := d.Handle
-	rows, _ := handle.Query("SELECT column_name, is_nullable, data_type, column_default FROM information_schema.columns WHERE table_schema = 'public' AND table_name = $1", table)
+	query := `SELECT column_name, is_nullable, data_type, column_default 
+			  FROM information_schema.columns 
+     		  WHERE table_schema = 'public' AND table_name = $1`
+	rows, _ := handle.Query(query, table)
+	defer rows.Close()
 
-	var (
-		columns    []db.Column
-		name       string
-		dataType   string
-		defaultVal string
-		nullable   string
-		isNull     bool
-	)
+	var columns []db.Column
 
 	for rows.Next() {
-		rows.Scan(&name, &nullable, &dataType, &defaultVal)
+		var (
+			column   db.Column
+			nullable string
+			isNull   bool
+		)
+
+		rows.Scan(&column.Name, &nullable, &column.Type, &column.Default)
 
 		if nullable == "YES" {
 			isNull = true
@@ -101,12 +103,8 @@ func (d *Data) getColumns(table string) []db.Column {
 			isNull = false
 		}
 
-		columns = append(columns, db.Column{
-			Name:     name,
-			Type:     dataType,
-			Nullable: isNull,
-			Default:  defaultVal,
-		})
+		column.Nullable = isNull
+		columns = append(columns, column)
 	}
 
 	return columns

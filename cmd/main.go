@@ -29,13 +29,14 @@ const (
 // Monitor commands
 const (
 	MonitorHelp          = "\\h"
-	MonitorExit          = "\\q"
+	MonitorShortExit     = "\\q"
+	MonitorLongExit      = "exit"
 	MonitorConfig        = "\\cf"
 	MonitorHistory       = "\\hc"
 	MonitorInfoConnect   = "\\i"
 	MonitorStart         = "\\s"
-	MonitorTables        = "\\t"
-	MonitorTableColumns  = "\\tc"
+	MonitorTablesList    = "\\tl"
+	MonitorTableInfo     = "\\ti"
 	MonitorRelationships = "\\tr"
 )
 
@@ -56,18 +57,18 @@ func helpText() {
 
 // monitorHelpText monitor help information
 func monitorHelpText() {
-	fmt.Println("\n\tLists of all commands:\n\t\t" +
+	fmt.Println("\tLists of all commands:\n\t\t" +
 		MonitorHelp + "  - help information.\n\t\t" +
 		MonitorConfig + " - check config.\n\t\t" +
 		MonitorHistory + " - history commands.\n\t\t" +
 		MonitorInfoConnect + "  - info about connection.\n\t\t" +
 		MonitorStart + "  - start tests.\n\t\t" +
-		MonitorTables + "  - check existing tables\n\t\t" +
-		MonitorTableColumns + " [table] - check existing table column\n\t\t" +
+		MonitorTablesList + " - check existing tables\n\t\t" +
+		MonitorTableInfo + " [table] - check existing table column\n\t\t" +
 		MonitorRelationships + " - check relationship tables." +
 		"\n\t\t\tRelations are determined by the name of the column that matches the pattern 'table_id' or by the presence of a foreign key.\n\t\t\t" +
 		"To manage relationships, use the d command.\n\t\t" +
-		MonitorExit + "  - exit.")
+		MonitorShortExit + " or " + MonitorLongExit + "  - exit.")
 }
 
 func main() {
@@ -124,8 +125,13 @@ func main() {
 		command := sc.Text()
 		t.SaveHistory(command)
 
-		if strings.Contains(command, MonitorTableColumns) {
-			tableName := strings.Replace(command, MonitorTableColumns, "", 1)
+		if strings.Contains(command, ";") {
+			command = strings.Replace(command, ";", "", 1)
+		}
+
+		//todo change contains for more security
+		if strings.Contains(command, MonitorTableInfo) {
+			tableName := strings.Replace(command, MonitorTableInfo, "", 1)
 			tableName = strings.TrimSpace(tableName)
 
 			tables := conn.Analyze()
@@ -137,13 +143,13 @@ func main() {
 				continue
 			}
 
-			db.PrintColumns(table.Columns)
+			db.PrintColumns(table)
 			t.PrintCursor()
 			continue
 		}
 
 		switch command {
-		case MonitorExit:
+		case MonitorShortExit, MonitorLongExit:
 			fmt.Println("Bye")
 			return
 		case MonitorHelp:
@@ -155,7 +161,7 @@ func main() {
 		case MonitorInfoConnect:
 			data := conn.GetDataConnect()
 			data.PrintInfoConnect()
-		case MonitorTables:
+		case MonitorTablesList:
 			tables := conn.Analyze()
 			db.PrintTables(tables)
 		default:
