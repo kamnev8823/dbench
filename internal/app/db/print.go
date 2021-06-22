@@ -57,7 +57,7 @@ func PrintColumns(table Table) {
 			}
 		}
 
-		fmt.Printf("-- %v\n\t|-->type: %v\n\t|-->nullable: %v\n\t|-->default: %v\n", t.Name, t.Type, t.Nullable, t.Default)
+		fmt.Printf("-- %v\n\t|-->type: %v\n\t|-->default: %v\n\t|-->nullable: %v\n", t.Name, t.Type, t.Default, t.Nullable)
 		if foreign != (ForeignKey{}) {
 			fmt.Printf("\t\t|-->constrain_name: %v\n\t\t|-->reference_table: %v\n\t\t|-->reference_column: %v\n", foreign.ConstraintName, foreign.ReferenceTable, foreign.ReferenceColumn)
 		}

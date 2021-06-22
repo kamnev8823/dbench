@@ -5,7 +5,6 @@ package helpers
 func ConvertDBMSNullToBool(s string) bool {
 	if s == "YES" {
 		return true
-	} else {
-		return false
 	}
+	return false
 }

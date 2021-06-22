@@ -134,6 +134,12 @@ func main() {
 			tableName := strings.Replace(command, MonitorTableInfo, "", 1)
 			tableName = strings.TrimSpace(tableName)
 
+			if tableName == "" {
+				log.Println("Missing parameter [table]!")
+				t.PrintCursor()
+				continue
+			}
+
 			tables := conn.Analyze()
 			table, err := db.FindTable(tableName, tables)
 
