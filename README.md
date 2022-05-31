@@ -1,2 +1,2 @@
 # dbench
-### database benchmark, test your database is more effectively
+### database benchmark, test your database
